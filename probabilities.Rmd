@@ -1,0 +1,213 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(MASS)
+perm <- function(n, r){ # perm_without_replacement
+  return(factorial(n)/factorial(n - r))
+}
+```
+Timer
+```{r}
+(120 - (3.4 * 23))
+```
+
+Calculations
+```{r}
+A = 3/7 + 1/28
+A
+```
+
+
+Common probability formulas
+```{r}
+AandB = 0.25
+AandNotB = 0.25
+A = AandB + AandNotB
+A
+fractions(A)
+```
+```{r}
+A = 0.4 * 0.75
+B = 0.4 * 0.5
+AandB = A * B
+
+AorB = A + B - AandB
+1 - AorB
+fractions(AorB)
+```
+```{r}
+A = 0.4
+B = 0.3
+C = 0.1
+AandB = 0.1
+BandC = 0.1
+AandC = 0.1
+AandBandC = 0.1
+AorBorC = A + B + C - AandB - BandC - AandC + AandBandC
+AorBorC
+fractions(AorBorC)
+```
+```{r}
+B = 0.5
+AandB = 0.3
+AgivenB = AandB / B
+AgivenB
+fractions(AgivenB)
+```
+
+
+Bayes theorem
+```{r}
+A = 0.2
+notA = 1 - A
+BgivenA = 0.25
+BgivenNotA = 0.9
+
+BandA = A * BgivenA
+BandNotA = notA * BgivenNotA
+B = BandNotA + BandA
+AgivenB = BandA / B
+AgivenB
+fractions(AgivenB)
+```
+permuation,not all distinct 
+```{r}
+total = 9
+dups = c(3,4,2)
+total == sum(dups)
+factorial(total) / prod(factorial(dups))
+```
+
+```{r}
+A = 2 * (1/6) * (1/6) + (1/6)^2
+A
+fractions(A)
+```
+```{r}
+A = choose(12,4)*choose(7,4)*choose(5,4)/choose(24,12)
+A
+fractions(A)
+```
+
+```{r}
+A = choose(4,3) * perm(4,3) * perm(4,1) / perm(10,4)
+fractions(A)
+```
+
+```{r}
+choose(2,1) * choose(6,4)
+```
+
+```{r}
+polyroot(c(-4,2,1)) # c1, c2(x), c3(x^2)
+```
+
+Chebyshevs
+```{r}
+mu = 4
+sd = 1
+k = 4
+
+limits = c(mu - k * sd, mu + k * sd)
+cat("P(| X -",mu,"|<=",k*sd,") = P(",limits[1],"<= X >=",limits[2],") >=",1-1/k^2,"\nP(| X -",mu,"|>",k*sd,") = P(X <",limits[1],"or X >",limits[2],") <=",1/k)
+```
+
+discrete cdf 1 variable
+```{r}
+pdf = c(0.3,0.5,0.1,0.1)
+xi = c(0,2,5,6)
+
+A = sum(pdf)
+ex = sum(xi*pdf)
+A
+fractions(A)
+ex
+fractions(ex)
+```
+by function
+```{r}
+pdf = function(x) (1/2^x)
+xi = c(1, 2, 3)
+
+A = sum(pdf(xi))
+ex = sum(xi*pdf(xi))
+A
+fractions(A)
+ex
+fractions(ex)
+```
+discrete cdf 2 variable
+```{r}
+pdf = function(x, y) (1/25 * (x^2 + y^2))
+xi = c(1)
+yi = c(0)
+
+A = sum(pdf(xi, yi))
+A
+fractions(A)
+```
+discrete marginal distribution
+```{r}
+pdf = function(x, y) (1/25 * (x^2 + y^2))
+xi = c(1,2)
+yi = c(0,1,2)
+
+df = expand.grid(xi, yi)
+df$Var3 = pdf(df$Var1, df$Var2)
+dfx = data.frame(x=double(), fx=double())
+for (val in xi) {
+  A = sum(pdf(val, df[which(df$Var1==val),]$Var2))
+  dfx[nrow(dfx) + 1,] = list(val,A)
+}
+dfy = data.frame(y=double(), fy=double())
+for (val in yi) {
+  A = sum(pdf(df[which(df$Var2==val),]$Var1, val))
+  dfy[nrow(dfy) + 1,] = list(val,A)
+}
+df
+dfx
+dfy
+A = dfx$fx[1] * dfy$fy[1]
+B = pdf(xi[1], yi[1])
+cat("fx * fy =", A,"\nfxy =", B)
+```
+Conditional on y
+```{r}
+yval = 1
+
+res = vector()
+cat("fx|y(x|y =",yval,"):\n")
+for (val in df[which(df$Var2==yval),]$Var3 / dfy[which(dfy$y==yval),]$fy) {
+  res = c(res, val)
+  print(val)
+  print(fractions(val))
+}
+cat("E(X|Y =",yval,"):\n")
+ex = sum(df[which(df$Var2==yval),]$Var1 * res)
+ex
+fractions(ex)
+```
+Conditional on x
+```{r}
+xval = 1
+
+res = vector()
+cat("fy|x(y|x =",xval,"):\n")
+for (val in df[which(df$Var1==xval),]$Var3 / dfx[which(dfx$x==xval),]$fx) {
+  res = c(res, val)
+  print(val)
+  print(fractions(val))
+}
+ey = sum(df[which(df$Var1==xval),]$Var2 * res)
+cat("E(Y|X =",xval,"):\n")
+ey
+fractions(ey)
+```
+
+```{r}
+58.5 + o*(4.5)
+```
+

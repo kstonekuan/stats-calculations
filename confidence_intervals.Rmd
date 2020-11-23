@@ -1,0 +1,190 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+printCIz = function(zt, zo, zs, lower, upper, g, l, alpha, Xb) cat("CI:",lower,"< mu <",upper,"\none-tail: P(Z >",zo,") = P(Z <",-zo,") =",alpha, "\ntwo-tail: P(Z <",-zt," or Z >",zt,") =", alpha,"\nP(Xb >",Xb,") = P(Z >",zs,") =",g,"\nP(Xb <",Xb,") = P(Z <",zs,") =", l, "\nP(Xb <",-Xb," or Xb >",Xb,") = P(Z <",-zs," or Z >",zs,") =", 2*g, "\nP(Xb <",Xb," or Xb >",-Xb,") = P(Z <",zs," or Z >",-zs,") =", 2*l)
+printCIt = function(tt, to, ts, lower, upper, g, l, alpha, Xb) cat("CI:",lower,"< mu <",upper,"\none-tail: P(T >",to,") = P(T < ",-to,") =",alpha, "\ntwo-tail: P(T <",-tt,"or T >",tt,") =", alpha,"\nP(Xb >",Xb,") = P(T >",ts,") =",g, "\nP(Xb <",Xb,") = P(T <",ts,") =", l, "\nP(Xb <",-Xb," or Xb >",Xb,") = P(T <",-ts,"or T >",ts,") =", 2*g, "\nP(Xb <",Xb," or Xb >",-Xb,") = P(T <",ts,"or T >",-ts,") =", 2*l)
+getLimits = function(Xb, range) {
+  lower = Xb - range
+  upper = Xb + range
+  return(c(lower, upper))
+}
+```
+CI with Z
+```{r}
+alpha = 1 - 0.95
+Xb = 60
+sd = 2
+n = 25 # >30
+mu = 59
+
+zt = qnorm(alpha/2, lower.tail=FALSE)
+range = zt * sd / sqrt(n)
+limits = getLimits(Xb, range)
+zo = qnorm(alpha, lower.tail=FALSE)
+zs = (Xb - mu) / (sd / sqrt(n))
+g = pnorm(zs, mean=0, sd=1, lower.tail=FALSE)
+l = pnorm(zs, mean=0, sd=1)
+printCIz(zt, zo, zs, limits[1], limits[2], g, l, alpha, Xb)
+```
+CI with T
+```{r}
+alpha = 1 - 0.90
+Xb = 8439
+S = 95
+n = 25
+mu = 0
+
+tt = abs(qt(alpha/2, df=n-1))
+range = (tt * S / sqrt(n))
+limits = getLimits(Xb, range)
+limits[2] - limits[1]
+to = abs(qt(alpha, df=n-1))
+ts = (Xb - mu) / (S / sqrt(n))
+g = pt(ts, df=n-1, lower.tail=FALSE)
+l = pt(ts, df=n-1)
+printCIt(tt, to, ts, limits[1], limits[2], g, l, alpha, Xb)
+```
+CI with Z two means
+```{r}
+alpha = 1 - 0.95
+Xb = 4 - 1
+sd = c(1, 1)
+n = c(30, 30) # >30
+mu = 0
+
+zt = abs(qnorm(alpha/2))
+range = (zt * sqrt((sd[1] ^ 2 / n[1]) + (sd[2] ^ 2 / n[2])))
+limits = getLimits(Xb, range)
+zo = abs(qnorm(alpha))
+zs = (Xb - mu) / sqrt((sd[1] ^ 2 / n[1]) + (sd[2] ^ 2 / n[2]))
+g = pnorm(zs, mean=0, sd=1, lower.tail=FALSE)
+l = pnorm(zs, mean=0, sd=1)
+printCIz(zt, zo, zs, limits[1], limits[2], g, l, alpha, Xb)
+```
+
+CI with T two means
+```{r}
+alpha = 0.01
+Xb = 30.59 - 27.78
+S = c(2.13, 1.73)
+n = c(13, 13)
+mu = 0
+
+tt = abs(qt(alpha/2, df=n[1]+n[2]-2))
+Sp = sqrt((((n[1]-1) * S[1]^2) + ((n[2] - 1) * S[2]^2)) / (n[1] + n[2] - 2))
+range = tt * Sp*sqrt((1 / n[1]) + (1 / n[2]))
+limits = getLimits(Xb, range)
+to = abs(qt(alpha, df=n[1]+n[2]-2))
+ts = (Xb - mu) / (Sp*sqrt((1 / n[1]) + (1 / n[2])))
+g = pt(ts, df=n[1]+n[2]-2, lower.tail=FALSE)
+l = pt(ts, df=n[1]+n[2]-2)
+printCIt(tt, to, ts, limits[1], limits[2], g, l, alpha, Xb)
+```
+
+Paired data Z
+
+```{r}
+xi = c(1,2,3,4,5)
+yi = c(1.1,2.1,3.1,4.1,5.1)
+alpha = 1 - 0.95
+n = 50 # >30
+mu = 0
+
+db = mean(xi - yi)
+sd = sd(xi-yi)
+zt = abs(qnorm(alpha/2))
+range = (zt * sd / sqrt(n))
+limits = getLimits(db, range)
+zo = abs(qnorm(alpha))
+zs = (db - mu) / (sd / sqrt(n))
+g = pnorm(zs, mean=0, sd=1, lower.tail=FALSE)
+l = pnorm(zs, mean=0, sd=1)
+printCIz(zt, zo, zs, limits[1], limits[2], g, l, alpha, Xb)
+```
+Paired data T
+```{r}
+xi = c(30,17,18,21,22,30,24,27)
+yi = c(26,18,15,20,21,25,27,23)
+alpha = 1 - 0.95
+n = 8
+mu = 0
+
+db = mean(xi - yi)
+S = sd(xi-yi)
+tt = abs(qt(alpha/2, df=n-1))
+range = (tt * S / sqrt(n))
+limits = getLimits(db, range)
+to = abs(qt(alpha, df=n-1))
+ts = (db - mu) / (S / sqrt(n))
+g = pt(ts, df=n-1, lower.tail=FALSE)
+l = pt(ts, df=n-1)
+printCIt(tt, to, ts, limits[1], limits[2], g, l, alpha, db)
+```
+CI with Chi without mean
+```{r}
+alpha = 0.01
+S = 0.24584
+n = 10
+sd = sqrt(0.03)
+
+x2og = qchisq(alpha, df=n-1, lower.tail=FALSE)
+x2ol = qchisq(1-alpha, df=n-1, lower.tail=FALSE)
+x2tg = qchisq(alpha/2, df=n-1, lower.tail=FALSE)
+x2tl = qchisq(1-alpha/2, df=n-1, lower.tail=FALSE)
+limits = (n-1)*S^2 * c(1/x2tg, 1/x2tl)
+x2s = (n-1) * S^2 / sd^2
+g = pchisq(x2s, df=n-1, lower.tail=FALSE)
+l = pchisq(x2s, df=n-1)
+
+cat("CI:",limits[1],"< sd^2 <",limits[2], "\none-tail: P(X2 >",x2og,") = P(X2 <", x2ol,") =",alpha,"\ntwo-tail: P(X2 <",x2tl," or X2 >",x2tg,") =", alpha, "\nP(X2 >",x2s,") =",g, "\nP(X2 <",x2s,") =", l)
+```
+CI with Chi with mean
+```{r}
+alpha = 1 - 0.90
+xi = c(1,2,3,4)
+mu = 0
+S = 0.022
+n = 1219
+sd = 1
+
+x2og = qchisq(alpha, df=n-1, lower.tail=FALSE)
+x2ol = qchisq(1-alpha, df=n-1, lower.tail=FALSE)
+x2tg = qchisq(alpha/2, df=n-1, lower.tail=FALSE)
+x2tl = qchisq(1-alpha/2, df=n-1, lower.tail=FALSE)
+limits = sum((xi-mu)^2) * c(1/x2tg, 1/x2tl)
+x2s = (n-1) * S^2 / sd^2
+g = pchisq(x2s, df=n-1, lower.tail=FALSE)
+l = pchisq(x2s, df=n-1)
+
+cat("CI:",limits[1],"< sd^2 <",limits[2], "\none-tail: P(X2 >",x2og,") = P(X2 <", x2ol,") =",alpha,"\ntwo-tail: P(X2 <",x2tl," or X2 >",x2tg,") =", alpha, "\nP(X2 >",x2s,") =",g, "\nP(X2 <",x2s,") =", l)
+```
+CI with F
+```{r}
+alpha = 1 - 0.95
+S = c(sqrt(5),sqrt(8))
+n = c(8,8)
+
+fog = qf(alpha, df1=n[1]-1, df2=n[2]-1, lower.tail=FALSE) 
+fol = qf(1-alpha, df1=n[1]-1, df2=n[2]-1, lower.tail=FALSE) 
+ftg = qf(alpha/2, df1=n[1]-1, df2=n[2]-1, lower.tail=FALSE) 
+ftl = qf(1-alpha/2, df1=n[1]-1, df2=n[2]-1, lower.tail=FALSE)
+limits = (S[1]^2 / S[2]^2) * c(1/ftg, 1/ftl)
+fs = S[1]^2 / S[2]^2
+g = pf(fs, df1=n[1]-1, df2=n[2]-1, lower.tail=FALSE)
+l = pf(fs, df1=n[1]-1, df2=n[2]-1)
+
+cat("CI:",limits[1],"< sd1^2/sd2^2 <",limits[2],"\none-tail: P(F >",fog,") = P(F <",fol,") =",alpha,"\ntwo-tail: P(F <",ftl," or F >",ftg,") =",alpha, "\nP(F >",fs,") =",g, "\nP(F <",fs,") =", l)
+```
+
+minimum n for margin of error
+```{r}
+e = 0.1
+alpha = 1 - 0.95
+sd = 0.75
+
+z = abs(qnorm(alpha/2))
+(z*sd/e)^2
+```
+

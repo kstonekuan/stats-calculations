@@ -1,0 +1,156 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(mosaic)
+library(mosaicCalc)
+```
+Exponential Distribution
+```{r}
+mu = 2 # parameter alpha is 1/mu, E(X) = mu
+x = c(5, Inf)
+
+cat("P(",x[1],"< X <",x[2],") =", pexp(x[2], rate=1/mu) - pexp(x[1], rate=1/mu))
+```
+Binomial Distribution
+```{r}
+p = 1/3
+n = 6
+x = 2
+
+e = dbinom(x, size=n, prob=p)
+g = pbinom(x, size=n, prob=p, lower.tail=FALSE) + e
+l = pbinom(x, size=n, prob=p) - e
+cat("P(X =",x,") =", e, "\nP(X >=",x,") =", g, "\nP(X <",x,") =", l)
+```
+Negative Binomial Distribution
+```{r}
+p = 1/6
+x = 5
+k = 2
+
+e = dnbinom(x-1, size=k, prob=p)
+g = pnbinom(x-1, size=k, prob=p, lower.tail=FALSE) + e
+l = pnbinom(x-1, size=k, prob=p) - e
+cat("P(X =",x,") =", e, "\nP(X >=",x,") =", g, "\nP(X <",x,") =", l)
+```
+Poisson
+```{r}
+# PDF
+x = 1
+lambda = 2
+
+e = dpois(x, lambda=lambda)
+g = ppois(x, lambda=lambda, lower=FALSE) + e
+l = ppois(x, lambda=lambda) - e
+cat("P(X =",x,") =", e, "\nP(X >=",x,") =", g, "\nP(X <",x,") =", l)
+```
+Normal distribution
+```{r}
+x = 340
+mu = 170 + 160
+sd = sqrt(20^2 + 15^2)
+
+z = (x - mu) / sd
+g = pnorm(z, mean=0, sd=1, lower.tail=FALSE)
+l = pnorm(z, mean=0, sd=1)
+cat("P(X >=",x,") = P(Z >=",z,") =", g, "\nP(X <",x,") = P(Z <",z,") =", l)
+```
+```{r}
+x = c(70, 75)
+mu = 60
+sd = 10
+
+z = (x - mu) / sd
+cat("P(",x[1],"< X <",x[2],") = P(",z[1],"< Z <",z[2],") =", pnorm(z[2], mean=0, sd=1) - pnorm(z[1], mean=0, sd=1), "\nP(X <",x[1]," or X >",x[2],") = P(Z <",z[1],"or Z >",z[2],") =", pnorm(z[1], mean=0, sd=1) + pnorm(z[2], mean=0, sd=1, lower.tail=FALSE))
+```
+Z statistic
+```{r}
+z = 1.333333
+
+g = pnorm(z, mean=0, sd=1, lower.tail=FALSE)
+l = pnorm(z, mean=0, sd=1)
+cat("P(Z >=",z,") =", g, "\nP(Z <",z,") =", l, "\nP(Z <",-z," or Z >",z,") =", 2*g)
+```
+```{r}
+z = c(-3, 3)
+
+cat("P(",z[1],"< Z <",z[2],") =", pnorm(z[2], mean=0, sd=1) - pnorm(z[1], mean=0, sd=1), "\nP(Z <",z[1],"or Z >",z[2],") =", pnorm(z[1], mean=0, sd=1) + pnorm(z[2], mean=0, sd=1, lower.tail=FALSE))
+```
+T statistic
+```{r}
+n = 5
+t = 2.776445
+
+g = pt(t, df=n-1, lower.tail=FALSE)
+l = pt(t, df=n-1)
+cat("P(T >=",t,") = ", g, "\nP(T <",t,") =", l, "\nP(T <",-t,"or T >",t,") =", 2*g)
+```
+Chisq value
+```{r}
+n = 25
+chi = 42.37
+
+g = pchisq(chi, df=n-1, lower.tail=FALSE)
+l = pchisq(chi, df=n-1)
+cat("P(X >=",chi,"):",g,"\nP(X <",chi,":",l)
+```
+F value
+```{r}
+n = c(5, 2)
+f = 19.29641
+
+g = pf(f, df1=n[1]-1, df2=n[2]-1, lower.tail=FALSE)
+l = pf(f, df1=n[1]-1, df2=n[2]-1)
+cat("P(F >=",f,") =", g, "\nP(F <",f,") =", l)
+```
+Convert samples to z
+```{r}
+Xb = c(773.6864 ,802.3136 )
+mu = 790
+sd = 40
+n = 30 # >=30 or popn normal
+
+z = (Xb - mu) / (sd / sqrt(n))
+cat("P(",Xb[1],"< Xb <",Xb[2],") = P(",z[1],"< Z <",z[2],") =", pnorm(z[2], mean=0, sd=1) - pnorm(z[1], mean=0, sd=1), "\nP(Xb <",Xb[1]," or Xb >",Xb[2],") = P(Z <",z[1],"or Z >",z[2],") =", pnorm(z[1], mean=0, sd=1) + pnorm(z[2], mean=0, sd=1, lower.tail=FALSE))
+```
+Convert samples to t
+```{r}
+Xb = c(2, 3)
+mu = 1
+S = 1
+n = 5
+
+t = (Xb - mu) / (S / sqrt(n))
+cat("P(",Xb[1],"< Xb <",Xb[2],") = P(",t[1],"< T <",t[2],") =", pt(t[2], df=n-1) - pt(t[1], df=n-1), "\nP(Xb <",Xb[1]," or Xb >",Xb[2],") = P(T <",t[1],"or T >",t[2],") =", pt(t[1], df=n-1) + pt(t[2], df=n-1, lower.tail=FALSE))
+```
+Convert samples to chi
+```{r}
+S = c(sqrt(3.462),sqrt(10.745))
+n = 25
+sd = sqrt(6)
+
+x2 = (n-1) * S^2 / sd^2
+cat("P(",S[1]^2,"< S^2 <",S[2]^2,") = P(",x2[1],"< X^2 <",x2[2],") =", pchisq(x2[2], df=n-1) - pchisq(x2[1], df=n-1), "\nP(S^2 <",S[1]^2," or S^2 >",S[2]^2,") = P(X^2 <",x2[1],"or X^2 >",x2[2],") =", pchisq(x2[1], df=n-1) + pchisq(x2[2], df=n-1, lower.tail=FALSE))
+```
+Sampling
+```{r}
+sample = c(37.4,48.8,46.9,55.0,44.0)
+
+Xb = mean(sample)
+S2 = var(sample)
+S = sd(sample)
+cat("Xb =", Xb, "\nS^2 =", S2, "\nS =", S)
+```
+Mean and variance
+```{r}
+xi = c(1, 0.5, 1/3)
+fxi = c(16/36, 16/36, 4/36)
+
+ex = sum(fxi * xi)
+ex2 = sum(fxi * xi^2)
+vx = ex2 - ex^2
+cat("E(X) =", ex,"\nE(X^2) =", ex2, "\nV(X) =", vx, "\nSD =", sqrt(vx))
+```
+
